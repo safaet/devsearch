@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import Profile
-from .forms import CustomUserCreationForm, ProfileForm, SkillForm
+from .forms import CustomUserCreationForm
+
 
 def loginUser(request):
     page = 'login'
@@ -53,19 +54,24 @@ def registerUser(request):
             messages.success(request, 'User account was created!')
 
             login(request, user)
-            return redirect('edit-account')
-        
+            return redirect('profiles')
+
         else:
             messages.success(
                 request, 'An error has occurred during registration')
 
-
     context = {'page': page, 'form': form}
     return render(request, 'users/login_register.html', context)
+    
 
 
 def profiles(request):
-    profiles = Profile.objects.all()
+    search_query = ''
+
+    if request.GET.get('search_query'):
+        search_query = request.GET.get('search_query')
+
+    profiles = Profile.objects.filter(name__icontains=search_query)
     context = {'profiles': profiles}
     return render(request, 'users/profiles.html', context)
 
